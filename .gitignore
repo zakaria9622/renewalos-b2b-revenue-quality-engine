@@ -1,0 +1,61 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Local environments and secrets
+.env
+.env.*
+!.env.example
+secrets.*
+*.pem
+*.key
+
+# Streamlit local files
+.streamlit/
+app/.streamlit/
+
+# dbt artifacts
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+dbt/package-lock.yml
+logs/
+
+# Generated data files
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/interim/
+data/external/
+*.duckdb
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+*.csv
+*.tsv
+*.xlsx
+
+# IDE and OS settings
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "renewalos"
+version = "0.1.0"
+description = "Engineering scaffold for a synthetic B2B revenue reconciliation portfolio project."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "duckdb",
+    "pandas",
+    "polars",
+    "dbt-duckdb",
+    "streamlit",
+    "plotly",
+    "scikit-learn",
+    "ortools",
+    "pydantic",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "mypy",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+mypy_path = "src"
+files = ["src"]
+warn_unreachable = true
