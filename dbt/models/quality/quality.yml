@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: dq_contract_exceptions
+    description: |
+      Contract-domain exception records for known synthetic failure scenarios.
+      Grain: one row per detected contract exception record and rule.
+      Each row retains rule metadata, account/date context when available, and incident-registry linkage when matchable.
+      These rows are diagnostic controls and are not KPI outputs.
+    columns:
+      - name: rule_id
+        description: Stable quality-rule identifier.
+      - name: severity
+        description: "Control severity used by account-month gating: critical or warning."
+      - name: affected_record_identifier
+        description: Source record identifier that triggered the exception.
+      - name: incident_id
+        description: Registered synthetic incident ID when the exception can be linked.
+
+  - name: dq_billing_exceptions
+    description: |
+      Billing-domain exception records for late-arriving events, orphaned billing references, and invalid negative ARR movements.
+      Grain: one row per detected billing event exception and rule.
+      These rows preserve problems for review instead of filtering or repairing them.
+
+  - name: dq_usage_exceptions
+    description: |
+      Usage-domain exception records for churned accounts with active usage and stale usage extracts.
+      Grain: one row per detected usage event exception and rule.
+
+  - name: dq_support_exceptions
+    description: |
+      Support-domain exception records for duplicate synthetic support tickets.
+      Grain: one row per support ticket participating in a duplicate-ticket group.
+
+  - name: dq_identifier_exceptions
+    description: |
+      Identifier and ownership exception records across CRM, usage, and Customer Success sources.
+      Grain: one row per detected identifier or required-field exception and rule.
+
+  - name: dq_incident_detection_coverage
+    description: |
+      Compares incident_registry.csv to produced quality exceptions.
+      Grain: one row per registered synthetic incident.
+      detection_status is detected when a rule links to the incident ID or, as a fallback, the registered scenario.
+      not_detected indicates a registered incident with no matching exception and should be reviewed before KPI work.
+
+  - name: dq_account_month_quality_status
+    description: |
+      Account-month quality gate derived from detected exceptions and the observable account-month spine.
+      Grain: one row per observable account_id and account_month.
+      Status logic: blocked when at least one critical exception is mapped to the account-month; warning when no critical exception but at least one warning exception is mapped; eligible_with_caveat when no mapped exception is observed and the month has contract or billing evidence; no_observed_issue when no mapped exception is observed and the month is only observable from non-revenue source activity.
+      This status does not certify management KPI readiness; it is a control input for later KPI gates.
+    columns:
+      - name: quality_status
+        description: One of blocked, warning, eligible_with_caveat, or no_observed_issue.
+      - name: quality_status_reason
+        description: Human-readable explanation of the assigned quality gate status.
