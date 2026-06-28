@@ -1,0 +1,23 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: >
+      Synthetic raw CSV files loaded into DuckDB by the RenewalOS raw loader.
+      Raw values are untrusted and intentionally include controlled incidents.
+    tables:
+      - name: accounts
+        description: Synthetic CRM account source, one row per generated account.
+      - name: contracts
+        description: Synthetic contract source, one row per contract period.
+      - name: billing_events
+        description: Synthetic billing source, one row per ARR movement or billing event.
+      - name: usage_events
+        description: Synthetic usage source, one row per account-month.
+      - name: support_tickets
+        description: Synthetic support source, one row per ticket.
+      - name: cs_interactions
+        description: Synthetic Customer Success source, one row per interaction.
+      - name: incident_registry
+        description: Registry of controlled data-quality incidents injected into the raw files.

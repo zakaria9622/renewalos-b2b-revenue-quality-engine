@@ -1,0 +1,92 @@
+version: 2
+
+models:
+  - name: stg_accounts
+    description: |
+      Purpose: Normalize the synthetic raw accounts source while preserving raw account identifiers and incident markers.
+      Grain: One row per raw account record.
+      Source lineage: raw.accounts loaded from data/raw/accounts.csv.
+      Important assumptions: Dates are parsed with try_cast and parse failures are exposed rather than filtered.
+      Warning: Trusted KPI reporting is blocked until the data-quality stage is complete.
+    columns:
+      - name: account_id
+        description: Normalized account identifier derived from the raw account_id.
+      - name: raw_account_id
+        description: Unmodified account_id value from the raw CSV.
+      - name: has_injected_quality_issue
+        description: True when the row was created or modified by controlled incident injection.
+
+  - name: stg_contracts
+    description: |
+      Purpose: Stage synthetic contract records with parsed date and amount fields while keeping raw values visible.
+      Grain: One row per raw contract period record.
+      Source lineage: raw.contracts loaded from data/raw/contracts.csv.
+      Important assumptions: Contract anomalies such as overlaps, missing renewal dates, and contradictory statuses are preserved.
+      Warning: Trusted KPI reporting is blocked until the data-quality stage is complete.
+    columns:
+      - name: contract_id
+        description: Normalized contract identifier derived from the raw contract_id.
+      - name: account_id
+        description: Normalized account identifier from the contract source.
+      - name: has_missing_renewal_date
+        description: True when the raw renewal_date field is blank.
+
+  - name: stg_billing_events
+    description: |
+      Purpose: Stage synthetic billing and ARR movement events with safe date and numeric parsing.
+      Grain: One row per raw billing event.
+      Source lineage: raw.billing_events loaded from data/raw/billing_events.csv.
+      Important assumptions: Actual generated event_type values are preserved; invalid negative movements and late arrivals are flagged.
+      Warning: Trusted KPI reporting is blocked until the data-quality stage is complete.
+    columns:
+      - name: billing_event_id
+        description: Normalized billing event identifier derived from the raw billing_event_id.
+      - name: event_type
+        description: Raw generated event category, such as opening_arr, renewal, expansion_arr, contraction_arr, churned_arr, new_arr, or manual_adjustment.
+      - name: has_invalid_negative_arr_movement
+        description: True when a negative ARR delta appears outside generated contraction or churn event categories.
+
+  - name: stg_usage_events
+    description: |
+      Purpose: Stage synthetic account-month usage records with parsed activity and extract dates.
+      Grain: One row per raw usage event, expected to represent account-month activity.
+      Source lineage: raw.usage_events loaded from data/raw/usage_events.csv.
+      Important assumptions: Stale extracts and identifier mismatches are preserved for later quality checks.
+      Warning: Trusted KPI reporting is blocked until the data-quality stage is complete.
+    columns:
+      - name: usage_event_id
+        description: Normalized usage event identifier.
+      - name: account_id
+        description: Normalized account identifier from the usage source.
+      - name: has_stale_extract_date
+        description: True when the extract date is earlier than the activity month.
+
+  - name: stg_support_tickets
+    description: |
+      Purpose: Stage synthetic support tickets with parsed creation dates and preserved issue attributes.
+      Grain: One row per raw support ticket.
+      Source lineage: raw.support_tickets loaded from data/raw/support_tickets.csv.
+      Important assumptions: Duplicate-looking tickets are not deduplicated in staging.
+      Warning: Trusted KPI reporting is blocked until the data-quality stage is complete.
+    columns:
+      - name: ticket_id
+        description: Normalized ticket identifier.
+      - name: account_id
+        description: Normalized account identifier from the support source.
+      - name: has_injected_quality_issue
+        description: True when the ticket row carries an injected quality issue marker.
+
+  - name: stg_cs_interactions
+    description: |
+      Purpose: Stage synthetic Customer Success interactions with parsed interaction dates and preserved owner/sentiment fields.
+      Grain: One row per raw Customer Success interaction.
+      Source lineage: raw.cs_interactions loaded from data/raw/cs_interactions.csv.
+      Important assumptions: Interactions logged to invalid account IDs are retained for later diagnostics.
+      Warning: Trusted KPI reporting is blocked until the data-quality stage is complete.
+    columns:
+      - name: interaction_id
+        description: Normalized Customer Success interaction identifier.
+      - name: account_id
+        description: Normalized account identifier from the interaction source.
+      - name: has_injected_quality_issue
+        description: True when the interaction row carries an injected quality issue marker.

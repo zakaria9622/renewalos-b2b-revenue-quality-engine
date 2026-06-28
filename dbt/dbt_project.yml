@@ -1,0 +1,18 @@
+name: renewalos
+version: "1.0.0"
+config-version: 2
+
+profile: renewalos
+
+model-paths: ["models"]
+
+models:
+  renewalos:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    quality:
+      +materialized: table
+    marts:
+      +materialized: table

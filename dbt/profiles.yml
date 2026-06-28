@@ -1,0 +1,8 @@
+renewalos:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "../data/processed/renewalos.duckdb"
+      schema: main
+      threads: 4
