@@ -1,0 +1,87 @@
+version: 2
+
+models:
+  - name: int_account_month_spine
+    description: |
+      Purpose: Create observable account-month rows from actual dates appearing across staged source domains.
+      Grain: One row per normalized account_id and observed account_month.
+      Source lineage: stg_accounts, stg_contracts, stg_billing_events, stg_usage_events, stg_support_tickets, and stg_cs_interactions.
+      Important assumptions: The spine reflects observed source dates only and does not create a complete trusted reporting calendar.
+      Warning: Trusted KPI reporting is blocked until the data-quality stage is complete.
+    columns:
+      - name: account_id
+        description: Normalized account identifier observed in at least one staged source domain.
+      - name: account_month
+        description: Month derived from an actual staged source date.
+      - name: observation_sources
+        description: Comma-separated list of source-domain observations that created the row.
+
+  - name: int_contract_timeline
+    description: |
+      Purpose: Preserve the account-contract timeline with overlap, missing-renewal, and status contradiction flags.
+      Grain: One row per staged contract record.
+      Source lineage: stg_contracts joined to stg_accounts and the account-month spine.
+      Important assumptions: Overlaps and duplicate active contracts are retained; this model does not decide which contract is correct.
+      Warning: Trusted KPI reporting is blocked until the data-quality stage is complete.
+    columns:
+      - name: contract_id
+        description: Normalized contract identifier from staging.
+      - name: has_overlapping_contract_period
+        description: True when another contract for the same account overlaps this contract period.
+      - name: is_exception_ready
+        description: True when the row has source conditions that should be reviewed by future data-quality checks.
+
+  - name: int_billing_movements
+    description: |
+      Purpose: Standardize actual generated billing event categories into preliminary movement categories.
+      Grain: One row per staged billing event.
+      Source lineage: stg_billing_events joined to staged account and contract identifiers.
+      Important assumptions: Only observed event_type values are mapped; manual_adjustment remains unmapped for KPI components.
+      Warning: Trusted KPI reporting is blocked until the data-quality stage is complete.
+    columns:
+      - name: billing_event_id
+        description: Normalized billing event identifier.
+      - name: movement_category
+        description: Category derived from actual raw event_type values.
+      - name: is_exception_ready
+        description: True when the movement has orphaned references, late arrival, invalid negative movement, or injected issue markers.
+
+  - name: int_account_month_operational_signals
+    description: |
+      Purpose: Derive supported operational account-health signals at account-month grain.
+      Grain: One row per observable account_id and account_month.
+      Source lineage: int_account_month_spine, stg_accounts, stg_usage_events, stg_support_tickets, stg_cs_interactions, int_contract_timeline, and dq_account_month_quality_status.
+      Quality-gating behavior: Preserves account-month quality status and exception counts for downstream scoring gates.
+      Scoring assumptions: Usage, support, and Customer Success concern labels use simulated threshold assumptions documented in docs/account_health_methodology.md.
+      Limitations: Signals are diagnostic and synthetic; this model does not produce a health score, prediction, recommendation, or business-impact claim.
+      Warning: This is not a predictive renewal-risk or churn model.
+    columns:
+      - name: account_id
+        description: Normalized account identifier.
+      - name: account_month
+        description: Observable source month.
+      - name: usage_concern
+        description: Diagnostic usage concern label derived from active users and recent trend.
+      - name: support_concern
+        description: Diagnostic support burden label derived from 90-day ticket volume, status, and severity.
+      - name: customer_success_engagement_concern
+        description: Diagnostic Customer Success engagement label derived from 90-day coverage and sentiment.
+      - name: quality_status
+        description: Preserved account-month quality status from the quality-control layer.
+
+  - name: int_account_month_renewal_signals
+    description: |
+      Purpose: Derive supported renewal timing and revenue-status signals at account-month grain.
+      Grain: One row per observable account_id and account_month.
+      Source lineage: int_account_month_spine, stg_accounts, int_contract_timeline, int_billing_movements, dq_contract_exceptions, and mart_revenue_reconciliation_diagnostics.
+      Quality-gating behavior: Preserves contract contradictions and renewal-status disagreements as signals; scoring gates are applied downstream.
+      Scoring assumptions: Renewal timing windows use simulated assumptions documented in docs/account_health_methodology.md.
+      Limitations: Renewal signals are diagnostic only and do not calculate renewal rate or predict renewal outcome.
+      Warning: This is not a predictive renewal-risk or churn model.
+    columns:
+      - name: renewal_urgency
+        description: Simulated timing label based on renewal or contract-end proximity.
+      - name: revenue_or_billing_status_concern
+        description: Diagnostic concern label based on billing exceptions and reconciliation status.
+      - name: has_renewal_status_disagreement
+        description: True when CRM renewal status disagreement is detected by the quality layer.
