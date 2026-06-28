@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "renewalos"
 version = "0.1.0"
-description = "Engineering scaffold for a synthetic B2B revenue reconciliation portfolio project."
+description = "Synthetic B2B revenue reconciliation and account-health decision-support project."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -19,6 +19,14 @@ dependencies = [
     "ortools",
     "pydantic",
 ]
+
+[project.scripts]
+renewalos-generate-raw = "renewalos.generation.validate_generation:main"
+renewalos-load-raw = "renewalos.warehouse.load_raw:main"
+renewalos-validate-quality = "renewalos.quality.validation:main"
+renewalos-validate-health = "renewalos.health.validation:main"
+renewalos-run-prioritization = "renewalos.prioritization.optimizer:main"
+renewalos-validate-prioritization = "renewalos.prioritization.validation:main"
 
 [project.optional-dependencies]
 dev = [

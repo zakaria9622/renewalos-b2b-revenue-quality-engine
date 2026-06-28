@@ -1,0 +1,153 @@
+version: 2
+
+models:
+  - name: mart_account_month_revenue
+    description: |
+      Purpose: Provide a preliminary account-month view of supported revenue movement components from generated billing events.
+      Grain: One row per observable account_id and account_month.
+      Source lineage: int_account_month_spine and int_billing_movements.
+      Important assumptions: Components are movement amounts only; renewal markers and manual adjustments are not treated as trusted KPI components.
+      Warning: This mart is not approved for management reporting and sets is_kpi_eligible to false.
+    columns:
+      - name: account_id
+        description: Normalized account identifier.
+      - name: account_month
+        description: Observable source month.
+      - name: supported_revenue_movement_amount
+        description: Sum of generated billing movements mapped to supported preliminary components.
+      - name: is_kpi_eligible
+        description: Always false until formal data-quality checks and reconciliation controls are implemented.
+      - name: quality_status
+        description: Preliminary status indicating whether exception review is required.
+
+  - name: mart_revenue_reconciliation_diagnostics
+    description: |
+      Purpose: Expose preliminary revenue reconciliation diagnostics and exception flags by account-month for future reconciliation work.
+      Grain: One row per observable account_id and account_month.
+      Source lineage: mart_account_month_revenue, int_contract_timeline, and dq_account_month_quality_status.
+      Important assumptions: Opening balance and expected closing balance are based only on supported generated billing movement components. Observed closing balance is derived from source contract exposure where available. Gaps are diagnostic only and are not forced to reconcile to zero.
+      Warning: This mart is not approved for management reporting and sets is_kpi_eligible to false.
+    columns:
+      - name: account_id
+        description: Normalized account identifier.
+      - name: account_month
+        description: Observable source month.
+      - name: opening_balance_amount
+        description: Preliminary opening balance derived from prior supported billing movements.
+      - name: expected_closing_balance_amount
+        description: Preliminary expected closing balance from opening balance plus supported current-month movements.
+      - name: observed_closing_balance_amount
+        description: Contract-derived observed closing balance where source contract exposure is derivable.
+      - name: reconciliation_gap_amount
+        description: Difference between observed closing balance and expected closing balance when both are derivable.
+      - name: reconciliation_status
+        description: Diagnostic reconciliation status such as blocked_by_quality_exception, gap_observed, not_assessable_no_observed_contract_balance, eligible_with_caveat_quality_warning, or no_gap_observed_preliminary.
+      - name: is_kpi_eligible
+        description: Always false until formal data-quality checks and reconciliation controls are implemented.
+
+  - name: mart_kpi_trust_status
+    description: |
+      Purpose: Provide a management-KPI gate status for account-month revenue metrics based on quality exceptions and reconciliation diagnostics.
+      Grain: One row per observable account_id and account_month.
+      Source lineage: mart_revenue_reconciliation_diagnostics and dq_account_month_quality_status.
+      Warning: This model does not calculate KPIs and does not approve management reporting; it states whether current diagnostic evidence blocks, caveats, or cannot assess future revenue-metric use.
+    columns:
+      - name: account_id
+        description: Normalized account identifier.
+      - name: account_month
+        description: Observable source month.
+      - name: revenue_metric_gate_status
+        description: "Gate status for future revenue metrics: blocked, eligible_with_caveat, or not_assessable."
+      - name: management_kpi_gate_reason
+        description: Explanation for the gate status.
+      - name: is_management_kpi_reporting_approved
+        description: Always false in the current implementation.
+
+  - name: mart_account_health
+    description: |
+      Purpose: Produce an explainable diagnostic account-health assessment from supported synthetic source signals.
+      Grain: One row per observable account_id and account_month.
+      Source lineage: int_account_month_operational_signals and int_account_month_renewal_signals.
+      Quality-gating behavior: Critical account-month quality issues force assessment_status to blocked_due_to_data_quality and keep health_score null. Missing required usage, contract, or observed revenue-balance signals force not_assessable and keep health_score null.
+      Scoring assumptions: Component scores use simulated threshold assumptions for revenue caveats, renewal timing, usage trend, support burden, and Customer Success engagement. These assumptions are documented in docs/account_health_methodology.md.
+      Limitations: This model is synthetic diagnostic output only. It does not calculate management KPIs, predict churn, recommend action, optimize capacity, or claim business impact.
+      Warning: This is not a predictive renewal-risk or churn model.
+    columns:
+      - name: assessment_status
+        description: One of blocked_due_to_data_quality, not_assessable, eligible_with_caveat, or eligible.
+      - name: health_score
+        description: Diagnostic score from 0 to 100 only for eligible or eligible_with_caveat rows.
+      - name: health_band
+        description: "Diagnostic band only for scored rows: critical, at_risk, monitor, or stable."
+      - name: explanation_summary
+        description: Plain-language summary of the assessment status and score availability.
+      - name: is_predictive_model_output
+        description: Always false; this output is not a predictive model result.
+      - name: is_automated_recommendation
+        description: Always false; this output is not an automated Customer Success recommendation.
+
+  - name: mart_account_health_explanations
+    description: |
+      Purpose: Provide long-form component explanations for diagnostic account-health outputs.
+      Grain: One row per account_id, account_month, and explanation component.
+      Source lineage: mart_account_health plus documented component lineage references.
+      Quality-gating behavior: Includes data-quality gate explanations and component explanations; blocked and not-assessable rows explain why components are not scored.
+      Scoring assumptions: Component explanations mirror the simulated thresholds used by mart_account_health.
+      Limitations: Explanations describe synthetic diagnostic signals only and do not constitute predictions or operational instructions.
+      Warning: This is not a predictive renewal-risk or churn model.
+
+  - name: mart_account_health_coverage
+    description: |
+      Purpose: Summarize diagnostic account-health assessment coverage and reason categories.
+      Grain: One row per assessment_status and reason_category, with total coverage counts repeated for easy inspection.
+      Source lineage: mart_account_health.
+      Quality-gating behavior: Separates blocked and not-assessable account-months from scored account-months.
+      Scoring assumptions: Coverage counts reflect the simulated account-health gate and scoring assumptions.
+      Limitations: Counts are synthetic diagnostic outputs and are not management KPIs or evidence of business impact.
+      Warning: This is not a predictive renewal-risk or churn model.
+
+  - name: mart_csm_priority_candidates
+    description: |
+      Purpose: Prepare quality-gated synthetic account-month candidates for future CSM prioritization.
+      Grain: One row per account_id and account_month from mart_account_health.
+      Source lineage: mart_account_health and mart_account_health_explanations.
+      Quality-gating behavior: Blocked and not-assessable account-months are retained with exclusion reasons and are not eligible candidates.
+      Limitations: This model does not select accounts, trigger action, calculate KPIs, or claim intervention results.
+      Warning: Synthetic diagnostic candidates only; not trusted management reporting.
+    columns:
+      - name: account_id
+        description: Normalized synthetic account identifier.
+      - name: account_month
+        description: Synthetic account-month observation period.
+      - name: is_eligible_candidate
+        description: True only when the account-month passed health and revenue-exposure gates.
+      - name: exclusion_reason
+        description: Reason an account-month is not eligible for simulated prioritization.
+      - name: explanation_drivers
+        description: Plain-language diagnostic drivers from the account-health explanation layer.
+      - name: is_automated_action
+        description: Always false; this mart does not represent an operational action.
+
+  - name: mart_csm_prioritization_inputs
+    description: |
+      Purpose: Convert eligible synthetic candidate rows into scenario-specific inputs for the Python capacity optimizer.
+      Grain: One eligible account_id and account_month per row.
+      Source lineage: mart_csm_priority_candidates.
+      Scenario assumptions: Effort, effectiveness, value-at-risk, and objective inputs are simulated assumptions documented in docs/scenario_assumptions.md.
+      Limitations: This model does not prove intervention effectiveness, produce observed outcomes, or approve operational decisions.
+      Warning: Synthetic prioritization inputs only; not trusted KPI reporting or business-impact evidence.
+    columns:
+      - name: priority_tier
+        description: Simulated tier derived from diagnostic health band and renewal urgency.
+      - name: estimated_account_value_at_risk
+        description: Scenario-assumption input for prioritization, not an observed loss estimate.
+      - name: estimated_effort_hours
+        description: Scenario-assumption CSM effort required for one account-month.
+      - name: assumed_intervention_effectiveness
+        description: Scenario assumption only; not an observed intervention outcome.
+      - name: expected_protected_value
+        description: Optimization input derived from synthetic assumptions, not a business result.
+      - name: priority_score
+        description: Expected protected value divided by estimated effort for ranking context.
+      - name: is_observed_intervention_outcome
+        description: Always false.
