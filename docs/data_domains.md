@@ -1,6 +1,6 @@
 # Data Domains
 
-These are future source domains and expected grains only. This document intentionally avoids detailed schemas until the design is reviewed.
+These are the synthetic source domains and expected grains used by RenewalOS. This document intentionally stays at the domain level; detailed column behavior is documented in the generation code, dbt models, and methodology documents.
 
 ## Accounts / CRM
 

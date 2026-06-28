@@ -2,7 +2,7 @@
 
 ## Project Objective
 
-RenewalOS will be a synthetic analytics engineering portfolio project that demonstrates how a B2B company could assess trust in ARR, NRR, churn, renewal, and account-health metrics before using those metrics for management decisions or Customer Success prioritization.
+RenewalOS is a synthetic analytics engineering portfolio project that demonstrates how a B2B company could assess trust in ARR, NRR, churn, renewal, and account-health metrics before using those metrics for management decisions or Customer Success prioritization.
 
 The objective is not to prove business impact. The objective is to design a defensible workflow for metric reconciliation, data-quality detection, and decision support using simulated data.
 
@@ -28,8 +28,10 @@ The objective is not to prove business impact. The objective is to design a defe
 
 - Conceptual design for synthetic B2B revenue and account-health analytics.
 - Definitions for key revenue, retention, churn, renewal, and health metrics.
-- Future source-domain descriptions and expected data grain.
-- Failure scenarios that should be deliberately injected into future simulated data.
+- Synthetic source-domain descriptions and expected data grain.
+- Reproducible synthetic source-data generation with controlled quality incidents.
+- Local DuckDB and dbt diagnostic warehouse layers.
+- Quality, reconciliation, account-health, and prioritization evidence layers.
 - Decision policies for when metrics can be used and how account prioritization should work.
 - Durable project instructions for future Codex work.
 
@@ -37,7 +39,7 @@ The objective is not to prove business impact. The objective is to design a defe
 
 - Real customer data or real company data.
 - Proprietary business logic, private schemas, or internal-system references.
-- Datasets, data-generation scripts, ETL or ELT pipelines, dbt models, notebooks, dashboards, charts, screenshots, Docker files, or deployment files.
+- Production datasets, notebooks, screenshots, Docker files, deployment files, or production operations.
 - Claims about business impact, production readiness, model accuracy, or completed analysis.
 - A detailed source schema before the conceptual domains are reviewed.
 - Automated account outreach or operational execution.
@@ -45,8 +47,8 @@ The objective is not to prove business impact. The objective is to design a defe
 ## Success Criteria
 
 - A reviewer can understand the business problem, intended users, and planned decision workflow.
-- Every planned metric has a clear business meaning, intended grain, required source domains, likely failure modes, and KPI classification.
-- Future source domains are described without prematurely locking in detailed schemas.
+- Every documented metric has a clear business meaning, intended grain, required source domains, likely failure modes, and KPI classification.
+- Source domains are described without relying on real company schemas or proprietary system details.
 - Failure scenarios are realistic and tied to management or diagnostic risk.
 - Decision rules prevent account prioritization when relevant data-quality checks fail.
 - Synthetic-data limitations and assumptions remain visible throughout the project.

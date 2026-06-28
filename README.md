@@ -6,15 +6,15 @@ RenewalOS is a synthetic portfolio project that designs a trustworthy analytics 
 
 ## Current Status
 
-**Design phase only — no data, models, or results yet.**
+**Synthetic source-data, preliminary warehouse layers, diagnostic quality controls, account-health diagnostics, a capacity-constrained synthetic CSM prioritization layer, and a local Streamlit Control Tower implemented - no trusted management KPI reporting, machine-learning models, observed intervention outcomes, or business results yet.**
 
-No datasets, pipelines, dbt models, dashboards, machine-learning code, notebooks, charts, screenshots, Docker files, or deployment artifacts have been created.
+Raw synthetic source CSVs can be generated locally, but they intentionally include controlled data-quality incidents and are not trusted for KPI reporting. A local DuckDB and dbt warehouse layer can stage, preserve, and diagnose those records. The prioritization layer is scenario analysis over synthetic diagnostics only. No production deployment, machine-learning code, notebooks, screenshots, Docker files, trusted KPI outputs, observed intervention outcomes, or business results have been created.
 
 ## Current Implementation Status
 
-The repository now contains a minimal Python package scaffold, local configuration paths, placeholder data directories, a Streamlit placeholder page, and CI configuration.
+The repository now contains a Python package, local configuration paths, placeholder data directories, a local Streamlit Control Tower, CI configuration, a reproducible synthetic source-data generation layer, a local DuckDB + dbt warehouse layer, diagnostic data-quality and reconciliation controls, diagnostic account-health outputs, and a capacity-constrained synthetic CSM prioritization layer.
 
-No source data, synthetic data generators, data pipelines, KPI calculations, reconciliation checks, dbt models, dashboards, charts, notebooks, machine-learning models, optimization logic, decision outputs, or business results are implemented.
+No trusted management KPI reporting, notebooks, machine-learning models, observed intervention outcomes, or business results are implemented.
 
 ## Local Setup
 
@@ -28,6 +28,146 @@ mypy src
 pytest
 ```
 
+## How To Reproduce Locally
+
+Run the full local validation flow from the repository root:
+
+```powershell
+renewalos-generate-raw
+renewalos-load-raw
+cd dbt
+dbt run
+dbt test
+cd ..
+renewalos-run-prioritization
+streamlit run app/app.py
+ruff check .
+mypy src
+pytest
+```
+
+The generated CSVs, DuckDB database, dbt artifacts, caches, virtual environment files, and local app outputs are ignored by Git.
+
+## What Makes This Project Different
+
+- It treats data trust as the first product requirement, not as cleanup after metric reporting.
+- It preserves quality blockers and reconciliation gaps instead of smoothing them away.
+- It separates raw untrusted data, diagnostic evidence, health scoring, and scenario recommendations.
+- It explains health and prioritization outputs with source lineage and explicit assumptions.
+- It constrains CSM prioritization by simulated capacity and keeps excluded records visible.
+
+## Synthetic Source Data
+
+Generate reproducible raw synthetic source CSV files with:
+
+```powershell
+renewalos-generate-raw
+```
+
+The generator uses fixed seed `20260228` for a 24-month simulated B2B portfolio. The raw files are explicitly synthetic, include intentional quality incidents, and are not trusted for KPI reporting.
+
+## Warehouse Architecture
+
+RenewalOS uses a local DuckDB database plus dbt-duckdb models:
+
+- `raw`: untrusted synthetic CSV values loaded without source-value alteration, with technical provenance metadata.
+- `staging`: parsed and normalized views that preserve raw identifiers, raw values, incident markers, and parse/quality flags.
+- `intermediate`: account-month, contract timeline, and billing movement layers that retain anomalies for review.
+- `marts`: preliminary diagnostic account-month revenue and reconciliation views that are not approved for management reporting.
+
+Run the local warehouse flow from the repository root:
+
+```powershell
+renewalos-generate-raw
+renewalos-load-raw
+cd dbt
+dbt debug
+dbt run
+cd ..
+```
+
+The mart layer is preliminary. It exposes exception-ready fields and diagnostic differences, but trusted KPI reporting remains blocked until data-quality tests and reconciliation controls are satisfied.
+
+## Data Quality and Reconciliation Controls
+
+Run the current control flow from the repository root:
+
+```powershell
+renewalos-generate-raw
+renewalos-load-raw
+cd dbt
+dbt run
+dbt test
+cd ..
+renewalos-validate-quality
+ruff check .
+mypy src
+pytest
+```
+
+The quality layer detects registered synthetic incidents, reports exception metadata, summarizes account-month quality status, and exposes preliminary reconciliation gaps. `mart_kpi_trust_status` provides a diagnostic gate for future revenue metrics, but management KPI reporting remains blocked in the current implementation. Raw files and diagnostic outputs include intentional quality incidents and must not be used directly for management KPI reporting.
+
+## Account Health
+
+Run the current diagnostic account-health flow from the repository root:
+
+```powershell
+renewalos-generate-raw
+renewalos-load-raw
+cd dbt
+dbt run
+dbt test
+cd ..
+renewalos-validate-quality
+renewalos-validate-health
+```
+
+The account-health layer creates explainable synthetic account-month diagnostics from supported revenue, renewal, usage, support, Customer Success, and data-quality signals. It is not a predictive churn model, renewal-risk model, automated Customer Success prioritization system, or business-impact claim.
+
+## Synthetic CSM Prioritization
+
+Run the current synthetic prioritization flow from the repository root:
+
+```powershell
+renewalos-generate-raw
+renewalos-load-raw
+cd dbt
+dbt run
+dbt test
+cd ..
+renewalos-run-prioritization
+```
+
+The output is a capacity-constrained scenario analysis over synthetic account-health diagnostics. It includes intentional data-quality exclusions and simulated assumptions. It is not trusted KPI reporting, not an observed intervention result, and not a business-impact claim.
+
+## Streamlit Control Tower
+
+Build the local synthetic pipeline and start the app from the repository root:
+
+```powershell
+renewalos-generate-raw
+renewalos-load-raw
+cd dbt
+dbt run
+dbt test
+cd ..
+renewalos-run-prioritization
+streamlit run app/app.py
+```
+
+The app is local-only; no deployment is configured.
+
+Implemented pages:
+
+- **Landing page:** implementation scope, synthetic-data disclaimer, data-readiness warning, and navigation guidance.
+- **Data Trust:** KPI gate status, quality statuses, exception categories, and incident detection coverage.
+- **Revenue Reconciliation:** diagnostic reconciliation statuses, gaps, filters, and account-month evidence.
+- **Account Health:** assessment coverage, eligible versus blocked records, health bands, and explanation drivers.
+- **CSM Prioritization:** simulated scenario assumptions, eligibility/exclusions, capacity usage, recommendations, and CSV export.
+- **Methodology:** documentation map and limitations.
+
+All app outputs are synthetic diagnostics or simulated scenario recommendations. They must not be treated as trusted management KPIs, real customer evidence, observed intervention outcomes, or business-impact results.
+
 ## Business Problem
 
 B2B companies often use ARR, NRR, churn, renewal, and account-health metrics to make Sales, Customer Success, Finance, and management decisions. Those decisions become risky when source systems disagree, revenue movements do not reconcile, account records are incomplete, or risk indicators are unreliable.
@@ -40,11 +180,11 @@ RenewalOS is designed to show how an analytics engineering project can make thos
 2. Which data-quality issues could distort management decisions?
 3. Which accounts should a limited Customer Success team prioritize once the data is trustworthy?
 
-## Planned Architecture
+## Architecture Summary
 
-The future architecture is expected to include simulated source domains, validation checks, reconciled metric logic, account-health diagnostics, and decision-policy documentation.
+The current architecture includes simulated source domains, validation checks, reconciliation diagnostics, account-health diagnostics, capacity-constrained prioritization, and decision-policy documentation.
 
-Planned components:
+Implemented components:
 
 - Synthetic source data representing CRM accounts, contracts, billing or subscription events, usage activity, support tickets, Customer Success interactions, and optional operational incidents.
 - Data-quality checks that detect known failure scenarios before KPI reporting or prioritization.
@@ -59,13 +199,10 @@ This is a synthetic public portfolio project only. It does not use real customer
 
 The project must not mention unrelated real companies, imply access to internal systems, or present fabricated business impact, model accuracy, screenshots, or completed analysis.
 
-## Planned Future Stages
+## Possible Future Stages
 
-1. Finalize design documents and review assumptions.
-2. Design simulated source schemas and data-generation rules.
-3. Generate synthetic data with deliberately injected data-quality incidents.
-4. Build validation checks and reconciliation tests.
-5. Define conceptual metric transformations and traceability.
-6. Create simulated management and diagnostic outputs only after validation passes.
-7. Add account-prioritization logic with clearly labelled scenario assumptions.
-8. Document limitations, review findings, and next analytical questions.
+1. Extend metric definitions into governed KPI transformations only after trust gates support them.
+2. Add broader quality scenarios if new source-domain risks are documented.
+3. Refine account-health assumptions with clearly labelled scenario versions.
+4. Review and extend prioritization logic only with clearly labelled scenario assumptions.
+5. Document limitations, validation findings, and next analytical questions.

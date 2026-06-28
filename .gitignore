@@ -34,13 +34,16 @@ dbt/target/
 dbt/logs/
 dbt/dbt_packages/
 dbt/package-lock.yml
+dbt/.user.yml
 logs/
 
 # Generated data files
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/README.md
 data/processed/*
 !data/processed/.gitkeep
+!data/processed/README.md
 data/interim/
 data/external/
 *.duckdb
