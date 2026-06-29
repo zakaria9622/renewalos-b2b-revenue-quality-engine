@@ -16,6 +16,20 @@ The repository now contains a Python package, local configuration paths, placeho
 
 No trusted management KPI reporting, notebooks, machine-learning models, observed intervention outcomes, or business results are implemented.
 
+## Interface Previews
+
+The local Streamlit Control Tower is a reviewer-facing interface for synthetic diagnostic outputs.
+
+![RenewalOS home page preview](docs/images/renewalos-home.png)
+
+Home page preview showing the project scope, synthetic-data disclaimer, and KPI reporting restrictions.
+
+![RenewalOS Data Trust diagnostics preview](docs/images/data-trust-diagnostics.png)
+
+Data Trust preview showing traceable quality-control categories across contracts, billing, usage, and support.
+
+The Streamlit app also includes account-health and CSM prioritization views. Prioritization outputs are simulated scenario recommendations, not trusted management KPIs, observed intervention outcomes, or business-impact results.
+
 ## Local Setup
 
 This project targets Python 3.12.
