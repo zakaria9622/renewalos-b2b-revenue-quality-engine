@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 import streamlit as st
+from app.bootstrap_ui import ensure_demo_data_ready_for_streamlit
 
 from renewalos.app import data_access
 from renewalos.app.formatting import SYNTHETIC_DISCLAIMER
@@ -11,7 +12,7 @@ st.set_page_config(page_title="RenewalOS Account Health", page_icon="RO", layout
 
 
 def _refresh_control() -> None:
-    if st.sidebar.button("Refresh local data"):
+    if st.sidebar.button("Refresh data cache"):
         st.cache_data.clear()
         st.rerun()
 
@@ -37,6 +38,7 @@ st.warning(
     "This is an explainable rule-based health framework. It is not a predictive churn model, "
     "renewal prediction, or automated outreach instruction."
 )
+ensure_demo_data_ready_for_streamlit()
 
 try:
     frames = _load_data()

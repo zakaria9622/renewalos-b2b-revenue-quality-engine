@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import streamlit as st
+from app.bootstrap_ui import ensure_demo_data_ready_for_streamlit
 
 from renewalos.app import data_access
 from renewalos.app.formatting import DATA_READINESS_WARNING, SYNTHETIC_DISCLAIMER
@@ -10,7 +11,7 @@ st.set_page_config(page_title="RenewalOS Data Trust", page_icon="RO", layout="wi
 
 
 def _refresh_control() -> None:
-    if st.sidebar.button("Refresh local data"):
+    if st.sidebar.button("Refresh data cache"):
         st.cache_data.clear()
         st.rerun()
 
@@ -29,6 +30,7 @@ _refresh_control()
 st.title("Data Trust")
 st.info(SYNTHETIC_DISCLAIMER)
 st.warning(DATA_READINESS_WARNING)
+ensure_demo_data_ready_for_streamlit()
 
 try:
     frames = _load_data()

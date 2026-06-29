@@ -62,6 +62,14 @@ pytest
 
 The generated CSVs, DuckDB database, dbt artifacts, caches, virtual environment files, and local app outputs are ignored by Git.
 
+## Live Demo Deployment
+
+For Streamlit Community Cloud, use `app/app.py` as the app entrypoint and `requirements.txt` as the dependency file.
+
+On startup, the app checks for required generated demo artifacts: synthetic raw CSVs, the local DuckDB warehouse with required dbt outputs, and the simulated CSM prioritization export. If any are missing or invalid, it rebuilds the deterministic synthetic demo pipeline in this order: synthetic generation, raw load, dbt run, prioritization output, then Streamlit display. A startup lock and artifact checks prevent the pipeline from running repeatedly on normal Streamlit reruns.
+
+All displayed records, diagnostics, assumptions, and recommendations remain synthetic and scenario-based. The live demo does not use real customer data, production systems, observed intervention outcomes, or production-ready management KPI reporting.
+
 ## What Makes This Project Different
 
 - It treats data trust as the first product requirement, not as cleanup after metric reporting.
@@ -169,7 +177,7 @@ renewalos-run-prioritization
 streamlit run app/app.py
 ```
 
-The app is local-only; no deployment is configured.
+The app can also initialize missing synthetic demo artifacts at startup for Streamlit Community Cloud. Generated CSVs, DuckDB files, dbt artifacts, and prioritization exports remain ignored by Git.
 
 Implemented pages:
 

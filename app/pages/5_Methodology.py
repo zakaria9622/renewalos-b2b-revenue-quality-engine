@@ -8,7 +8,7 @@ st.set_page_config(page_title="RenewalOS Methodology", page_icon="RO", layout="w
 
 
 def _refresh_control() -> None:
-    if st.sidebar.button("Refresh local data"):
+    if st.sidebar.button("Refresh data cache"):
         st.cache_data.clear()
         st.rerun()
 
@@ -72,7 +72,7 @@ st.header("Project Limitations")
 st.markdown(
     """
 - All source records and outputs are synthetic.
-- The app is local-only and reads generated files from this machine.
+- The app rebuilds deterministic synthetic demo artifacts when required.
 - Management KPI reporting remains restricted by the trust-status model.
 - Health scoring is rule-based and diagnostic, not predictive.
 - Prioritization outputs are simulated recommendations under documented assumptions.
