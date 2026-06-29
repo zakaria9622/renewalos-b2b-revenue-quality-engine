@@ -8,7 +8,7 @@ RenewalOS is a synthetic portfolio project that designs a trustworthy analytics 
 
 **Synthetic source-data, preliminary warehouse layers, diagnostic quality controls, account-health diagnostics, a capacity-constrained synthetic CSM prioritization layer, and a local Streamlit Control Tower implemented - no trusted management KPI reporting, machine-learning models, observed intervention outcomes, or business results yet.**
 
-Raw synthetic source CSVs can be generated locally, but they intentionally include controlled data-quality incidents and are not trusted for KPI reporting. A local DuckDB and dbt warehouse layer can stage, preserve, and diagnose those records. The prioritization layer is scenario analysis over synthetic diagnostics only. No production deployment, machine-learning code, notebooks, screenshots, Docker files, trusted KPI outputs, observed intervention outcomes, or business results have been created.
+Raw synthetic source CSVs can be generated locally, but they intentionally include controlled data-quality incidents and are not trusted for KPI reporting. A local DuckDB and dbt warehouse layer can stage, preserve, and diagnose those records. The prioritization layer is scenario analysis over synthetic diagnostics only. No production deployment, machine-learning code, notebooks, Docker files, trusted KPI outputs, observed intervention outcomes, or business results have been created.
 
 ## Current Implementation Status
 
