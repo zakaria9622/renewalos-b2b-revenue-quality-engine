@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pandas as pd
 import streamlit as st
-from app.bootstrap_ui import ensure_demo_data_ready_for_streamlit
 
 from renewalos.app import data_access
+from renewalos.app.bootstrap_ui import ensure_demo_data_ready_for_streamlit
 from renewalos.app.formatting import SYNTHETIC_DISCLAIMER
 from renewalos.app.validation import AppDataError
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -135,3 +136,34 @@ def test_generated_artifact_paths_are_not_tracked_and_are_git_ignored() -> None:
     ).stdout.decode().splitlines()
 
     assert sorted(ignored) == sorted(generated_paths)
+
+
+def test_streamlit_entrypoint_uses_unambiguous_installed_bootstrap_import() -> None:
+    script = """
+import importlib.util
+import sys
+from pathlib import Path
+
+repo_root = Path.cwd()
+sys.path.insert(0, str(repo_root / "app"))
+app_spec = importlib.util.find_spec("app")
+print(f"app_origin={app_spec.origin if app_spec is not None else ''}")
+is_package = app_spec.submodule_search_locations is not None if app_spec else False
+print(f"app_is_package={is_package}")
+from renewalos.app.bootstrap_ui import ensure_demo_data_ready_for_streamlit
+print(f"helper_module={ensure_demo_data_ready_for_streamlit.__module__}")
+print(f"app_loaded={'app' in sys.modules}")
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=PROJECT_ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert "app_origin=" in result.stdout
+    assert "app.py" in result.stdout
+    assert "app_is_package=False" in result.stdout
+    assert "helper_module=renewalos.app.bootstrap_ui" in result.stdout
+    assert "app_loaded=False" in result.stdout

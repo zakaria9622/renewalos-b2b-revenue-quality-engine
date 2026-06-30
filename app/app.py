@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.bootstrap_ui import ensure_demo_data_ready_for_streamlit
 from renewalos.app import data_access
+from renewalos.app.bootstrap_ui import ensure_demo_data_ready_for_streamlit
 from renewalos.app.formatting import DATA_READINESS_WARNING, SYNTHETIC_DISCLAIMER
 from renewalos.app.validation import AppDataError, validate_warehouse_ready
 
