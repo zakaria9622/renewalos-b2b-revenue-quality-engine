@@ -78,7 +78,7 @@ All displayed records, diagnostics, assumptions, and recommendations remain synt
 - It explains health and prioritization outputs with source lineage and explicit assumptions.
 - It constrains CSM prioritization by simulated capacity and keeps excluded records visible.
 
-## Synthetic Source Data
+## Source Data Generation
 
 Generate reproducible raw synthetic source CSV files with:
 
@@ -146,7 +146,7 @@ renewalos-validate-health
 
 The account-health layer creates explainable synthetic account-month diagnostics from supported revenue, renewal, usage, support, Customer Success, and data-quality signals. It is not a predictive churn model, renewal-risk model, automated Customer Success prioritization system, or business-impact claim.
 
-## Synthetic CSM Prioritization
+## CSM Prioritization
 
 Run the current synthetic prioritization flow from the repository root:
 
